@@ -1,3 +1,4 @@
+# jupyterで要りそうなもの
 jupyterlab
 jupyterlab_code_formatter
 jupyterlab_git
@@ -5,6 +6,7 @@ jupyterlab_widgets
 ipywidgets
 import-ipynb
 
+# datascienceで要りそうなもの
 numpy
 pandas
 scipy
@@ -14,6 +16,7 @@ opencv-python
 matplotlib
 japanize_matplotlib
 
+# その他必要なもの
 requests
 Pillow
 

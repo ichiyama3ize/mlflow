@@ -15,9 +15,11 @@ streamlit
 
 # jupyter
 
-etc/cookiemamama.yaml は cookiecutter の設定ファイルです。
-etc/exp は cookiecutter の設定ファイル実行するためのシェルスクリプトです。
-jupyterlab==1.7.0 ではjupyter server extension disable nbclassicを実行しないと起動しないようです。
+## for vscode
+拡張機能dev containersで、コンテナ内でvscodeを開く
+kernelは推奨された拡張機能を1,2個入れるだけで動いた(コンテナのpython確認済)
+
+作業はここで行う。
 
 
 # 役に立ちそうな参考
