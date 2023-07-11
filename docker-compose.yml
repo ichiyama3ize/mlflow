@@ -1,0 +1,48 @@
+version: '3'
+services:
+  db:
+    container_name: ${COMPOSE_PROJECT_NAME}-mysql
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      - MYSQL_DATABASE=analysis_db
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_USER=docker
+      - MYSQL_PASSWORD=docker
+      - TZ=Asia/Tokyo
+    image: mysql:8.0
+    platform: linux/x86_64
+    ports:
+      - "3306:3306"
+    restart: always
+    volumes:
+      - ./db/data:/var/lib/mysql
+      - ./etc/my.cnf:/etc/mysql/conf.d/my.cnf
+      
+  jupyter:
+    build:
+      context: .
+      dockerfile: ./containers/jupyter/Dockerfile
+    command: jupyter lab --ip=0.0.0.0 --port=${JPORT} --allow-root --no-browser --NotebookApp.token=""
+    container_name: ${COMPOSE_PROJECT_NAME}-jupyterlab
+    depends_on: 
+      - mlflow
+      - db
+    ports:
+      - "${JPORT}:${JPORT}"
+    restart: always
+    volumes:
+      - ./projects:/home/projects
+    working_dir: ${WORKING_DIR}
+    
+  mlflow:
+    build:
+      context: .
+      dockerfile: ./containers/mlflow/Dockerfile
+    command: mlflow server --backend-store-uri /home/mlruns --host 0.0.0.0 --port ${MPORT}
+    container_name: ${COMPOSE_PROJECT_NAME}-mlflow
+    ports:
+      - "${MPORT}:${MPORT}"
+    restart: always
+    volumes:
+      - ./mlruns:/home/mlruns
+
