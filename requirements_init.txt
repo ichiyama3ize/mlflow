@@ -15,6 +15,7 @@ pycaret
 opencv-python
 matplotlib
 japanize_matplotlib
+pyspark
 
 # その他必要なもの
 requests

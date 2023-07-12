@@ -16,19 +16,21 @@ services:
     restart: always
     volumes:
       - ./db/data:/var/lib/mysql
-      - ./etc/my.cnf:/etc/mysql/conf.d/my.cnf
       
   jupyter:
     build:
       context: .
       dockerfile: ./containers/jupyter/Dockerfile
-    command: jupyter lab --ip=0.0.0.0 --port=${JPORT} --allow-root --no-browser --NotebookApp.token=""
+      args:
+        WORKING_DIR: ${WORKING_DIR}
+        MLFLOW_PORT: ${MLFLOW_PORT}
+    command: jupyter lab --ip=0.0.0.0 --port=${JUPYTER_PORT} --allow-root --no-browser --NotebookApp.token=""
     container_name: ${COMPOSE_PROJECT_NAME}-jupyterlab
     depends_on: 
       - mlflow
       - db
     ports:
-      - "${JPORT}:${JPORT}"
+      - "${JUPYTER_PORT}:${JUPYTER_PORT}"
     restart: always
     volumes:
       - ./projects:/home/projects
@@ -38,10 +40,10 @@ services:
     build:
       context: .
       dockerfile: ./containers/mlflow/Dockerfile
-    command: mlflow server --backend-store-uri /home/mlruns --host 0.0.0.0 --port ${MPORT}
+    command: mlflow server --backend-store-uri /home/mlruns --host 0.0.0.0 --port ${MLFLOW_PORT}
     container_name: ${COMPOSE_PROJECT_NAME}-mlflow
     ports:
-      - "${MPORT}:${MPORT}"
+      - "${MLFLOW_PORT}:${MLFLOW_PORT}"
     restart: always
     volumes:
       - ./mlruns:/home/mlruns

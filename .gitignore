@@ -1,4 +1,7 @@
 .vscode/
+
+.env*
+
+projects/*
 db/
 mlruns/
-etc/
