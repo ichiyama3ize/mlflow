@@ -1,13 +1,13 @@
 # mlflow
-モデル管理
+モデル管理のための環境
 
-
-構成
+# 構成
 MLflow
+Jupiter (with vscode)
 mysql
 streamlit
 
-
+## 設定など
 
 .envに記述
 
@@ -21,6 +21,21 @@ kernelは推奨された拡張機能を1,2個入れるだけで動いた(コン�
 
 作業はここで行う。
 
+# mlflow
+
+## ui上の操作
+
+Experimentのdelete
+=>.trashに移る
+
+modelのdelete
+=>
+
+dataset
+[mlflow.data](https://mlflow.org/docs/latest/python_api/mlflow.data.html?highlight=delta#mlflow.data.delta_dataset_source.DeltaDatasetSource)
+これ以外はartifactとして保存することで、モデルと結びつける
+データセットをmlflow形式にできないか？
+
 
 # 役に立ちそうな参考
 [MLOps](https://qiita.com/c60evaporator/items/e0eb1a0c521d1310d95d)
@@ -31,6 +46,17 @@ kernelは推奨された拡張機能を1,2個入れるだけで動いた(コン�
 
 
 # future work
+
+## ngrok
+現状、mlflowはlocalhostで繋げている。
+そのため、保存したartifactsを見せることができない。
+これはmlflowのモデルとその成果物（や考察）を一元管理する、
+
+
+```
+
+```
+
 
 ```
   streamlit:
