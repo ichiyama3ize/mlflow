@@ -6,5 +6,5 @@
 pyenv*
 
 projects/*
-db/
-mlruns/
+mysql/*
+mlruns/*

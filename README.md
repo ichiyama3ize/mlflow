@@ -1,14 +1,13 @@
-# mlflow
+# flow
 モデル管理のための環境
 
 # 構成
 MLflow
 Jupiter (with vscode)
 mysql
-streamlit
+
 
 ## 設定など
-
 .envに記述
 
 
@@ -22,16 +21,40 @@ streamlit
 git cloneして配布されたコードを動かす。
 そのために、仮想環境とkernelをjupyterに追加する必要がある。
 
-docker exec -ti mlflow-jupyter bash
-python -m venv myenv
-source myenv/bin/activate
+## パッケージ仮想環境
 
-pip install rich
+パッケージ仮想環境 <-(kernel登録)- jupyterサーバー <-(接続)- vscode上のjupyter
+実態はコンテナ内に生成。
+メタデータも出力し、ローカルにマウント。
+
+### venv
+* 特にインストールが要らない。(pip備え付け)
+
+docker exec -it コンテナ
+python -m venv 仮想環境名
+source 仮想環境名/bin/activate
 pip install ipykernel
-python -m ipykernel install --name myenv
+ipython kernel install --user --name=仮想環境名
 
-jupyterのkernelからmyenvを選択し、
-import richを確認。
+削除は
+jupyter kernel uninstall 仮想名
+
+### pipenv
+* pythonのverを指定可能
+* Pipfileによる必要パッケージの切り分け
+
+cd project
+pipenv --python $PYTHON_VERSION
+pipenv install ipykernel
+ipython kernel install --user --name=仮想名
+
+パッケージ出力
+pipenv requirements > requirements.txt
+
+仮想環境の削除
+pipenv --rm
+クリーンならフォルダごと。
+
 
 ## コマンド実行
 時間かかるやつは
@@ -47,10 +70,6 @@ notebooks/xxx.ipynb : nbconvertで生成された、動作済み（ipynb以外�
 
 
 ## for vscode
-拡張機能dev containersで、コンテナ内でvscodeを開く
-kernelは推奨された拡張機能を1,2個入れるだけで動いた(コンテナのpython確認済)
-
-作業はここで行う。
 
 ## ひっかかったところ
 
@@ -67,21 +86,6 @@ vscode側が設定ファイルを持っている。
 
 結論
 dev container内で適当に追加したあとに、そのままコンテナ外に出てdockerをダウンすると危険。
-
-
-
-したいこと
-dockerでjupyter起動
-jupyterに
-
-vscode.dev containerは
-dockerのメリット:使い捨て
-ができない。
-dev container自体の設定は仮想ではないので、
-過去のコンテナの設定を、rebuildしたコンテナに運んでしまう。
-時には構成が異なるためにコンテナに入れない場合もある。
-
-
 
 # mlflow
 
@@ -109,16 +113,7 @@ dataset
 
 # future work
 
-## ngrok
-現状、mlflowはlocalhostで繋げている。
-そのため、保存したartifactsを見せることができない。
-これはmlflowのモデルとその成果物（や考察）を一元管理する、
-
-
-```
-
-```
-
+## streamlit
 
 ```
   streamlit:
@@ -134,4 +129,16 @@ dataset
     volumes:
       - "./struns:/usr/src/app/struns"
 ```
+
+## cookiecutter
+projectのひな形を生成する。
+
+
+## ngrok
+現状、mlflowはlocalhostで繋げている。
+そのため、保存したartifactsを見せることができない。
+これはmlflowのモデルとその成果物（や考察）を一元管理する、
+
+
+
 

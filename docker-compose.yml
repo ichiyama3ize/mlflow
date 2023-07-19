@@ -1,7 +1,8 @@
 version: '3'
 services:
   db:
-    container_name: ${COMPOSE_PROJECT_NAME}-mysql
+    image: mysql:8.0
+    container_name: ${COMPOSE_PROJECT_NAME}-db
     command: --default-authentication-plugin=mysql_native_password
     environment:
       - MYSQL_DATABASE=analysis_db
@@ -9,13 +10,12 @@ services:
       - MYSQL_USER=docker
       - MYSQL_PASSWORD=docker
       - TZ=Asia/Tokyo
-    image: mysql:8.0
     platform: linux/x86_64
     ports:
       - "3306:3306"
     restart: always
     volumes:
-      - ./db/data:/var/lib/mysql
+      - ./mysql:/var/lib/mysql
       
   jupyter:
     build:
@@ -24,6 +24,7 @@ services:
       args:
         WORKING_DIR: ${WORKING_DIR}
         MLFLOW_PORT: ${MLFLOW_PORT}
+    container_name: ${COMPOSE_PROJECT_NAME}-lab
     command: > 
       jupyter lab 
       --ip=0.0.0.0 
@@ -31,10 +32,11 @@ services:
       --allow-root
       --no-browser
       --NotebookApp.token="${JUPYTER_TOKEN}"
-    container_name: ${COMPOSE_PROJECT_NAME}-jupyterlab
     depends_on: 
       - mlflow
       - db
+    environment:
+      - TZ=Asia/Tokyo
     ports:
       - "${JUPYTER_PORT}:${JUPYTER_PORT}"
     restart: always

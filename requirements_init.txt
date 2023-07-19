@@ -1,9 +1,4 @@
 jupyterlab
-jupyterlab_code_formatter
-jupyterlab-language-pack-ja-JP
-jupyterlab_git
-jupyterlab_widgets
-ipywidgets
-import-ipynb
-
 mlflow
+
+pipenv
