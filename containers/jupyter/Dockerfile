@@ -7,9 +7,10 @@ WORKDIR ${WORKING_DIR}
 ARG MLFLOW_PORT
 ENV MLFLOW_PORT=${MLFLOW_PORT}
 
-COPY requirements_init.txt /${WORKDIR}/requirements_init.txt
+COPY requirements_init.txt ${WORKING_DIR}/requirements.txt
 
 RUN pip install --upgrade pip setuptools && \
-    pip install -r /${WORKDIR}/requirements_init.txt
+    pip install pipenv && \
+    pip install -r ${WORKING_DIR}/requirements.txt
 
 RUN jupyter server extension disable nbclassic

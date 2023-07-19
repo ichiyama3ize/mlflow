@@ -1,24 +1,9 @@
-# jupyterで要りそうなもの
 jupyterlab
 jupyterlab_code_formatter
+jupyterlab-language-pack-ja-JP
 jupyterlab_git
 jupyterlab_widgets
 ipywidgets
 import-ipynb
-
-# datascienceで要りそうなもの
-numpy
-pandas
-scipy
-scikit-learn
-pycaret
-opencv-python
-matplotlib
-japanize_matplotlib
-pyspark
-
-# その他必要なもの
-requests
-Pillow
 
 mlflow

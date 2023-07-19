@@ -24,7 +24,13 @@ services:
       args:
         WORKING_DIR: ${WORKING_DIR}
         MLFLOW_PORT: ${MLFLOW_PORT}
-    command: jupyter lab --ip=0.0.0.0 --port=${JUPYTER_PORT} --allow-root --no-browser --NotebookApp.token="${JUPYTER_TOKEN}"
+    command: > 
+      jupyter lab 
+      --ip=0.0.0.0 
+      --port=${JUPYTER_PORT}
+      --allow-root
+      --no-browser
+      --NotebookApp.token="${JUPYTER_TOKEN}"
     container_name: ${COMPOSE_PROJECT_NAME}-jupyterlab
     depends_on: 
       - mlflow
