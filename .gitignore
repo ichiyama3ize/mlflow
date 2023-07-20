@@ -1,10 +1,5 @@
 .vscode/
 
-.env*
-
-# python仮想環境のフォルダ、接頭語
-pyenv*
-
 projects/*
 mysql/*
 mlruns/*
