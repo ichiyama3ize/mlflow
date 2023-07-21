@@ -1,9 +1,4 @@
 jupyterlab
-jupyterlab_code_formatter
-jupyterlab-git
-lckr-jupyterlab-variableinspector
-jupyterlab_widgets
-ipywidgets
 import-ipynb
 
 mlflow

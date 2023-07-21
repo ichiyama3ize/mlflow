@@ -22,6 +22,7 @@ services:
       context: ./.containers/jupyter/
       dockerfile: Dockerfile
       args:
+        WORK_DIR: ${WORK_DIR}
         MLFLOW_PORT: ${MLFLOW_PORT}
     container_name: ${COMPOSE_PROJECT_NAME}-lab
     command: > 
@@ -40,8 +41,8 @@ services:
       - "${JUPYTER_PORT}:${JUPYTER_PORT}"
     restart: always
     volumes:
-      - ./projects:/home/projects
-    working_dir: /home/projects
+      - ./projects:${WORK_DIR}
+    working_dir: ${WORK_DIR}
     
   mlflow:
     build:

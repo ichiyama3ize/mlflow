@@ -1,18 +1,21 @@
 # flow
 モデル管理のための環境
 
+# 仕様上の注意
+* python 3.8はダメ：jupyter kernelがうまく動かない
+* 
+
+
+
+
+
+
 # 構成
 MLflow
 Jupiter (with vscode)
 mysql
 
-
-## 設定など
-.envに記述
-
-
-
-# jupyter
+# jupyter: flow-labコンテナ
 
 コンテナにjupyterlabを立ち上げる
 このjupyterコンテナ内にvscode ;dev containerで入る。（初回10分くらい）
@@ -26,6 +29,10 @@ git cloneして配布されたコードを動かす。
 パッケージ仮想環境 <-(kernel登録)- jupyterサーバー <-(接続)- vscode上のjupyter
 実態はコンテナ内に生成。
 メタデータも出力し、ローカルにマウント。
+
+仮想環境(.venv)はpipenvによる管理を行いたいため、flow-lab内に入って作成する。
+（notebookを通して可能）
+
 
 ### venv
 * 特にインストールが要らない。(pip備え付け)
@@ -52,6 +59,7 @@ ipython kernel install --user --name=仮想名
 pipenv requirements > requirements.txt
 
 仮想環境の削除
+jupyter kernel uninstall 仮想名
 pipenv --rm
 クリーンならフォルダごと。
 
@@ -69,10 +77,19 @@ notebooks/xxx.ipynb : nbconvertで生成された、動作済み（ipynb以外�
 
 
 
-## for vscode
+## for local vscode
+.ipynbの頭におまじない
+%cd $WORK_DIR
+%cd 現在のディレクトリを記入
+
+これはローカルvscodeで編集した場合、pwdが動かない問題を解決する。
+
+
+
 
 ## ひっかかったところ
 
+### dockerのdownミス
 1. docker内でjupyterのカーネルに"venv"を登録
 2. docker削除
 3. 再び同じ構成でdocker立ち上げ
@@ -86,6 +103,36 @@ vscode側が設定ファイルを持っている。
 
 結論
 dev container内で適当に追加したあとに、そのままコンテナ外に出てdockerをダウンすると危険。
+
+### vscodeのjupyter拡張機能の不備(issue)
+problem: 使用上の不便さ以外に、挙動が変わりうる。
+具体的にはos.getcwd()周辺が意図しない値になりうる。
+
+1. vscode上で.ipynbを作成、編集
+2. .ipynbをカレントディレクトリで開けていない
+3. $PWDが常にworking_dir
+4. dockerの設定ではなく、vscodeのせい。（jupyterで編集したら問題ない）
+5. stackOverflowなどの解決通りに設定をいじっても、改善せず。
+
+解決
+全ての.ipynbの頭におまじないを付ける
+%cd $WORK_DIR
+%cd 現在のディレクトリ
+
+現在のディレクトリを.ipynbが知る方法がないため教える必要がある。
+この部分を改良したければ解決2へ
+
+解決2 (future work)
+pwd(に相当する)コマンドを自作し、裏で動かす。
+おなじないを
+
+結論
+jupyterは「カーネル」を主な機能として使って、
+vscodeはそれを間借りしてるだけ。
+なので、.ipynbはまさにnotebookという認識をして、
+.ipynb自体が何かのシステムの一部にならないようにする（というか、そもそもそうでしょという話）
+そう思えば、vscodeが余計なことをする問題は全く本質的ではないし、共有時にクリティカルなエラーは起きない。
+
 
 # mlflow
 

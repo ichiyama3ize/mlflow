@@ -1,5 +1,12 @@
 .vscode/
+*__pycache__
 
-projects/*
+projects/notebooks/*
+projects/envs/*
+projects/survey/*
+projects/*.py
+projects/*.ipynb
+projects.old
+
 mysql/*
 mlruns/*
