@@ -3,6 +3,8 @@
 
 projects/notebooks/*
 projects/envs/*
+projects/data/*
+projects/src/*
 projects/survey/*
 projects/*.py
 projects/*.ipynb
