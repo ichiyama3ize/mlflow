@@ -63,6 +63,13 @@ jupyter kernel uninstall 仮想名
 pipenv --rm
 クリーンならフォルダごと。
 
+## データ
+マウント
+data/mnt
+
+zip形式のデータの展開用。
+
+
 
 ## コマンド実行
 時間かかるやつは

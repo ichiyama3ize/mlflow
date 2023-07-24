@@ -1,22 +1,5 @@
 version: '3'
-services:
-  db:
-    image: mysql:8.0
-    container_name: ${COMPOSE_PROJECT_NAME}-db
-    command: --default-authentication-plugin=mysql_native_password
-    environment:
-      - MYSQL_DATABASE=analysis_db
-      - MYSQL_ROOT_PASSWORD=root
-      - MYSQL_USER=docker
-      - MYSQL_PASSWORD=docker
-      - TZ=Asia/Tokyo
-    platform: linux/x86_64
-    ports:
-      - "3306:3306"
-    restart: always
-    volumes:
-      - ./mysql:/var/lib/mysql
-      
+services:   
   jupyter:
     build:
       context: ./.containers/jupyter/
@@ -32,9 +15,6 @@ services:
       --allow-root
       --no-browser
       --NotebookApp.token="${JUPYTER_TOKEN}"
-    depends_on: 
-      - mlflow
-      - db
     environment:
       - TZ=Asia/Tokyo
     ports:
@@ -42,17 +22,6 @@ services:
     restart: always
     volumes:
       - ./projects:${WORK_DIR}
+      - ${MOUNT_DIR}:${WORK_DIR}/data/mnt
     working_dir: ${WORK_DIR}
-    
-  mlflow:
-    build:
-      context: ./.containers/mlflow/
-      dockerfile: Dockerfile
-    command: mlflow server --backend-store-uri /home/mlruns --host 0.0.0.0 --port ${MLFLOW_PORT}
-    container_name: ${COMPOSE_PROJECT_NAME}-mlflow
-    ports:
-      - "${MLFLOW_PORT}:${MLFLOW_PORT}"
-    restart: always
-    volumes:
-      - ./mlruns:/home/mlruns
-
+  
