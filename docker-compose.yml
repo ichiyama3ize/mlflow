@@ -7,6 +7,8 @@ services:
       args:
         WORK_DIR: ${WORK_DIR}
         MLFLOW_PORT: ${MLFLOW_PORT}
+        DATASET: ${DATASET}
+        SSD_DIR: ${SSD_DIR}
     container_name: ${COMPOSE_PROJECT_NAME}-lab
     command: > 
       jupyter lab 
@@ -22,7 +24,8 @@ services:
     restart: always
     volumes:
       - ./projects:${WORK_DIR}
-      - ${MOUNT_DIR}:${WORK_DIR}/data/mnt
+      - ${DATASET}:/mnt/data/source
+      - ${SSD_DIR}:/mnt/data/process
     working_dir: ${WORK_DIR}
   
   # mlflow:

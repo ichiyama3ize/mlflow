@@ -53,7 +53,7 @@ jupyter kernel uninstall 仮想名
 cd envs/..../仮想名
 pipenv --python $PYTHON_VERSION
 pipenv install ipykernel
-pipenv ipython kernel install --user --name=仮想名 --display-name=表示名
+pipenv run ipython kernel install --user --name=仮想名 --display-name=表示名
 
 パッケージ出力
 pipenv requirements > requirements.txt
