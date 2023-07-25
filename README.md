@@ -50,10 +50,10 @@ jupyter kernel uninstall 仮想名
 * pythonのverを指定可能
 * Pipfileによる必要パッケージの切り分け
 
-cd project
+cd envs/..../仮想名
 pipenv --python $PYTHON_VERSION
 pipenv install ipykernel
-ipython kernel install --user --name=仮想名
+pipenv ipython kernel install --user --name=仮想名 --display-name=表示名
 
 パッケージ出力
 pipenv requirements > requirements.txt

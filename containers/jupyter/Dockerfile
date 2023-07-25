@@ -16,7 +16,6 @@ RUN git clone https://github.com/pyenv/pyenv.git ~/.pyenv && \
 COPY requirements_init.txt ${WORK_DIR}/
 
 RUN pip install --upgrade pip setuptools && \
-    pip install pipenv && \
     pip install --no-cache-dir -r ${WORK_DIR}/requirements_init.txt
 
 RUN jupyter server extension disable nbclassic
