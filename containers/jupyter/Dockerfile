@@ -4,13 +4,14 @@ USER root
 # env in container
 ARG WORK_DIR
 ARG MLFLOW_PORT
-ARG DATASET
-ARG SDD_DIR
 
 ENV WORK_DIR=${WORK_DIR}
 ENV MLFLOW_PORT=${MLFLOW_PORT}
-ENV DATASET=${DATASET}
-ENV SDD_DIR=${SDD_DIR}
+
+# for open-cv
+RUN apt-get update && apt-get upgrade -y && \
+    apt-get install -y libgl1-mesa-dev
+
 
 ENV PIPENV_VENV_IN_PROJECT=true
 

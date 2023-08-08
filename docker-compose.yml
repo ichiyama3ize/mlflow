@@ -7,8 +7,6 @@ services:
       args:
         WORK_DIR: ${WORK_DIR}
         MLFLOW_PORT: ${MLFLOW_PORT}
-        DATASET: ${DATASET}
-        SSD_DIR: ${SSD_DIR}
     container_name: ${COMPOSE_PROJECT_NAME}-lab
     command: > 
       jupyter lab 
