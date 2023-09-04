@@ -1,18 +1,12 @@
 .vscode
 *__pycache__
-*.ipynb*
 
-projects/notebooks/*
-projects/envs/*
-projects/data/*
-projects/src/*
-projects/survey/*
-projects/*.py
-projects/*.ipynb
-projects.old
+projects/*
 
-mysql/*
+aize
+*sql/*
 mlruns/*
+memo.md
 
 [alias]
     delete-merged-branch = "!f () { git checkout $1; git branch --merged|egrep -v '\\*|devel
