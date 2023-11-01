@@ -1,6 +1,0 @@
-pipenv
-
-jupyterlab
-import-ipynb
-
-#mlflow

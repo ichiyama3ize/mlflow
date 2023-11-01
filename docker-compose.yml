@@ -1,59 +1,72 @@
 version: '3'
-services:   
-  jupyter:
+services:
+
+  waitfordb:
+    image: dadarek/wait-for-dependencies
+    container_name: ${COMPOSE_PROJECT_NAME}-waitfordb
+    depends_on:
+      - db-server
+    restart: always
+    command: db-server:5432
+
+  db-server:
+    image: postgres:13.3
+    container_name: ${COMPOSE_PROJECT_NAME}-backend
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+      TZ: "Asia/Tokyo"
+    ports:
+      - 5432:5432
+    volumes:
+      - $PWD/db_server:/var/lib/postgresql/data
+
+  #DB GUI
+  # pgadmin:
+  #   image: dpage/pgadmin4
+  #   restart: always
+  #   ports:
+  #     - 81:80
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+  #     PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+  #   depends_on:
+  #     - db-server
+
+  tracking-server:
+    container_name: ${COMPOSE_PROJECT_NAME}-tracking
     build:
-      context: ./containers/jupyter/
+      context: ./containers/tracking_server
       dockerfile: Dockerfile
       args:
-        WORK_DIR: ${WORK_DIR}
-        MLFLOW_PORT: ${MLFLOW_PORT}
-    container_name: ${COMPOSE_PROJECT_NAME}-lab
-    command: > 
-      jupyter lab 
-      --ip=0.0.0.0 
-      --port=${JUPYTER_PORT}
-      --allow-root
-      --no-browser
-      --NotebookApp.token="${JUPYTER_TOKEN}"
-    environment:
-      - TZ=Asia/Tokyo
-    ports:
-      - "${JUPYTER_PORT}:${JUPYTER_PORT}"
+        - POSTGRES_USER=${POSTGRES_USER}
+        - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+        - DB_HOST=${COMPOSE_PROJECT_NAME}-backend
+        - DB_NAME=${DB_NAME}
+        - DEFAULT_ARTIFACT_ROOT=ftp://${FTP_USER_NAME}:${FTP_USER_PASS}@${HOST_IP}/artifact_location
+    image: mlflow-tracking:1.0
     restart: always
+    ports:
+      - "${MLFLOW_PORT}:${MLFLOW_PORT}"
+    depends_on:
+      - db-server
+      - waitfordb
+
+  ftp-server:
+    image: stilliard/pure-ftpd:latest
+    container_name: ${COMPOSE_PROJECT_NAME}-artifact
+    ports:
+      - "21:21"
+      - "30000-30009:30000-30009"
     volumes:
-      - ./projects:${WORK_DIR}
-      - ${DATASET}:/mnt/data/source
-      - ${SSD_DIR}:/mnt/data/process
-    working_dir: ${WORK_DIR}
-  
-  # mlflow:
-  #   build:
-  #     context: ./containers/mlflow
-  #     dockerfile: Dockerfile
-  #   command: mlflow server --backend-store-uri /home/mlruns --host 0.0.0.0 --port ${MLFLOW_PORT}
-  #   container_name: ${COMPOSE_PROJECT_NAME}-mlflow
-  #   ports:
-  #     - "${MLFLOW_PORT}:${MLFLOW_PORT}"
-  #   restart: always
-  #   volumes:
-  #     - ./mlruns:/home/mlruns
-
-  # db:
-  #   image: mysql:8.0
-  #   container_name: ${COMPOSE_PROJECT_NAME}-db
-  #   command: --default-authentication-plugin=mysql_native_password
-  #   environment:
-  #     - MYSQL_DATABASE=analysis_db
-  #     - MYSQL_ROOT_PASSWORD=root
-  #     - MYSQL_USER=docker
-  #     - MYSQL_PASSWORD=docker
-  #     - TZ=Asia/Tokyo
-  #   platform: linux/x86_64
-  #   ports:
-  #     - "3306:3306"
-  #   restart: always
-  #   volumes:
-  #     - ./mysql:/var/lib/mysql
-
-
-
+      - ./ftp/data:/home/ftpusers
+      - ./ftp/passwd:/etc/pure-ftpd/passwd
+    environment:
+      - PUBLICHOST="localhost"
+      - FTP_USER_NAME=${FTP_USER_NAME}
+      - FTP_USER_PASS=${FTP_USER_PASS}
+      - FTP_USER_HOME=/home/ftpusers
+      - ADDED_FLAGS="--tls=2"
+    restart: always

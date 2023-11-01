@@ -3,10 +3,8 @@
 
 projects/*
 
-aize
+
 *sql/*
 mlruns/*
 memo.md
-
-[alias]
-    delete-merged-branch = "!f () { git checkout $1; git branch --merged|egrep -v '\\*|devel
+.env
