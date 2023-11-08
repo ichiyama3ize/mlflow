@@ -3,8 +3,9 @@
 
 projects/*
 
+db_server
+minio
+ngrok
 
-*sql/*
-mlruns/*
 memo.md
 .env

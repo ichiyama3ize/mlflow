@@ -1,9 +1,36 @@
-version: '3'
+version: "3.8"
 services:
+
+  mlflow:
+    container_name: ${COMPOSE_PROJECT_NAME}-tracking
+    build:
+      context: ./containers/tracking-server
+      dockerfile: Dockerfile
+    expose:
+      - ${MLFLOW_PORT}
+    ports:
+      - "${MLFLOW_PORT}:${MLFLOW_PORT}"
+    restart: unless-stopped
+    depends_on:
+      - waitfordb
+      - minio
+    environment:
+      TZ: Asia/Tokyo
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_HOST: ${COMPOSE_PROJECT_NAME}-${DB_HOST}
+      DB_NAME: ${DB_NAME}
+      MLFLOW_S3_ENDPOINT_URL: ${AWS_ENDPOINT}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+    command: >
+      mlflow server
+      --backend-store-uri "postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${COMPOSE_PROJECT_NAME}-${DB_HOST}:5432/${DB_NAME}"
+      --artifacts-destination 's3://mlflow/artifacts' 
+      --serve-artifacts --host 0.0.0.0 --port ${MLFLOW_PORT}
 
   waitfordb:
     image: dadarek/wait-for-dependencies
-    container_name: ${COMPOSE_PROJECT_NAME}-waitfordb
     depends_on:
       - db-server
     restart: always
@@ -11,7 +38,7 @@ services:
 
   db-server:
     image: postgres:13.3
-    container_name: ${COMPOSE_PROJECT_NAME}-backend
+    container_name: ${COMPOSE_PROJECT_NAME}-${DB_HOST}
     restart: always
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
@@ -23,50 +50,47 @@ services:
     volumes:
       - $PWD/db_server:/var/lib/postgresql/data
 
-  #DB GUI
-  # pgadmin:
-  #   image: dpage/pgadmin4
-  #   restart: always
-  #   ports:
-  #     - 81:80
-  #   environment:
-  #     PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
-  #     PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
-  #   depends_on:
-  #     - db-server
-
-  tracking-server:
-    container_name: ${COMPOSE_PROJECT_NAME}-tracking
-    build:
-      context: ./containers/tracking_server
-      dockerfile: Dockerfile
-      args:
-        - POSTGRES_USER=${POSTGRES_USER}
-        - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-        - DB_HOST=${COMPOSE_PROJECT_NAME}-backend
-        - DB_NAME=${DB_NAME}
-        - DEFAULT_ARTIFACT_ROOT=ftp://${FTP_USER_NAME}:${FTP_USER_PASS}@${HOST_IP}/artifact_location
-    image: mlflow-tracking:1.0
-    restart: always
+  # S3互換のストレージ
+  minio:
+    image: minio/minio
+    container_name: ${COMPOSE_PROJECT_NAME}-minio
     ports:
-      - "${MLFLOW_PORT}:${MLFLOW_PORT}"
-    depends_on:
-      - db-server
-      - waitfordb
-
-  ftp-server:
-    image: stilliard/pure-ftpd:latest
-    container_name: ${COMPOSE_PROJECT_NAME}-artifact
-    ports:
-      - "21:21"
-      - "30000-30009:30000-30009"
-    volumes:
-      - ./ftp/data:/home/ftpusers
-      - ./ftp/passwd:/etc/pure-ftpd/passwd
+      - "9000:9000"
+      - "9001:9001"
     environment:
-      - PUBLICHOST="localhost"
-      - FTP_USER_NAME=${FTP_USER_NAME}
-      - FTP_USER_PASS=${FTP_USER_PASS}
-      - FTP_USER_HOME=/home/ftpusers
-      - ADDED_FLAGS="--tls=2"
-    restart: always
+      - MINIO_ROOT_USER=${AWS_ACCESS_KEY_ID}
+      - MINIO_ROOT_PASSWORD=${AWS_SECRET_ACCESS_KEY}
+    command: server /export --address :9000 --console-address :9001
+    volumes:
+      - ./minio/data:/export
+
+  # minioコンテナ起動時にデフォルトのバケットを自動作成する
+  createbuckets:
+    image: minio/mc
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc alias set myminio ${AWS_ENDPOINT} ${AWS_ACCESS_KEY_ID} ${AWS_SECRET_ACCESS_KEY};
+      /usr/bin/mc rm -r --force myminio/${AWS_BUCKET};
+      /usr/bin/mc mb myminio/${AWS_BUCKET};
+      exit 0;"
+
+  ngrok:
+    image: ngrok/ngrok
+    container_name: ${COMPOSE_PROJECT_NAME}-ngrok
+    depends_on:
+      - mlflow
+    restart: unless-stopped
+    command:
+      - "start"
+      - "--authtoken"
+      - "${NGROK_AUTH_TOKEN}"
+      - "--all"
+      - "--config"
+      - "/var/lib/ngrok/ngrok.yml"
+    volumes:
+      - ./ngrok/ngrok.log:/var/log/ngrok.log
+      - ./ngrok/ngrok.yml:/var/lib/ngrok/ngrok.yml
+    ports:
+      - 4040:4040
