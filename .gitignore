@@ -1,11 +1,8 @@
 .vscode
 *__pycache__
 
+containers/ngrok/ngrok.yml
 projects/*
-
-db_server
-minio
-ngrok
 
 memo.md
 .env

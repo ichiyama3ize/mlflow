@@ -4,7 +4,7 @@ services:
   mlflow:
     container_name: ${COMPOSE_PROJECT_NAME}-tracking
     build:
-      context: ./containers/tracking-server
+      context: ./containers/tracking_server
       dockerfile: Dockerfile
     expose:
       - ${MLFLOW_PORT}
@@ -48,7 +48,7 @@ services:
     ports:
       - 5432:5432
     volumes:
-      - $PWD/db_server:/var/lib/postgresql/data
+      - ${MOUNT_DB}:/var/lib/postgresql/data
 
   # S3互換のストレージ
   minio:
@@ -62,7 +62,7 @@ services:
       - MINIO_ROOT_PASSWORD=${AWS_SECRET_ACCESS_KEY}
     command: server /export --address :9000 --console-address :9001
     volumes:
-      - ./minio/data:/export
+      - ${MOUNT_MINIO}:/export
 
   # minioコンテナ起動時にデフォルトのバケットを自動作成する
   createbuckets:
@@ -77,8 +77,10 @@ services:
       exit 0;"
 
   ngrok:
-    image: ngrok/ngrok
     container_name: ${COMPOSE_PROJECT_NAME}-ngrok
+    build:
+      context: ./containers/ngrok/
+      dockerfile: Dockerfile
     depends_on:
       - mlflow
     restart: unless-stopped
@@ -88,9 +90,6 @@ services:
       - "${NGROK_AUTH_TOKEN}"
       - "--all"
       - "--config"
-      - "/var/lib/ngrok/ngrok.yml"
-    volumes:
-      - ./ngrok/ngrok.log:/var/log/ngrok.log
-      - ./ngrok/ngrok.yml:/var/lib/ngrok/ngrok.yml
+      - "/etc/ngrok/ngrok.yml"
     ports:
       - 4040:4040
