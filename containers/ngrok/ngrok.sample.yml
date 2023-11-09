@@ -1,14 +1,11 @@
 version: "2"
 console_ui: true
-web_addr: localhost:
+web_addr: localhost:4040
 region: jp
-
-# log_level: info
-# log_format: json
 
 tunnels:
  mlflow:
-   addr: mlflow:
+   addr: mlflow:5001
    proto: http
    basic_auth:
      - " : "
